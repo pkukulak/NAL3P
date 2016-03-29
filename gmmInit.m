@@ -20,9 +20,9 @@ X = zeros(0, d);
 spkrDD = dir([spkrDir, filesep, '*.mfcc']);
 
 for iFile=1:length(spkrDD)
-    
     speakerFn = strcat(spkrDir, '/', spkrDD(iFile).name);
-    X = [X; textread(speakerFn)];
+    speakerUt = textread(speakerFn);
+    X = [X; speakerUt(:, 1:14)];
 end
 
 % Covariance matrices are diagonal, so we initialize
@@ -32,8 +32,8 @@ end
 % We return a struct with the initialized parameters and data
 % as fields.
 init_res.w = ones(M, 1) / M;
-init_res.mu = X(ceil(rand * size(X, 1)), :);
-init_res.sig = ones(d, M);
-init_res.X = X;
+init_res.mu = X(randperm(size(X, 1), M), :);
+init_res.sig = ones(M, d);
+init_res.X = X(:, 1:14);
 
 end
