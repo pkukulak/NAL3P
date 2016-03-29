@@ -17,17 +17,32 @@ function GMM = gmmTrain(dataDir, fn_GMM, M, max_iter)
 %   GMM      - a struct containing all GMMs. that is, a GMM for
 %              each speaker in the training set.
 
-% All MFCC vectors have 14 features and then a log summary.
-d = 14 + 1;
+% All MFCC vectors have 13 features followed by log energy.
+d = 13 + 1;
+
+% Convergence criteria hyperparameter.
+eps = 0.005;
 
 GMM = struct();
 
 topDD = dir([dataDir, filesep, '*']);
 for iDir=3:length(topDD)
     speakerDir = strcat(dataDir, topDD(iDir).name);
-    
     % This speaker's GMM.
     GMM.(topDD(iDir).name) = gmmInit(M, d, speakerDir);
     
+    i = 0;
+    prev_ll = -Inf;
+    diff = Inf;
+    T = size(GMM.(topDD(iDir).name.X), 1);
+    
+    %while (i <= max_iter && diff >= eps)
+    %    for m=1:M
+    %        meansRep = repmat(gmm.(topDD(iDir).name).mu(m,:), T, 1);
+    %        covRep = repmat(gmm.(topDD(iDir).name).sig(m, :), T, 1);
+    %        minsMeansSquare = (gmm.(topDD(iDir).name).X - meansRep).^2;
+    %        normalized = 
+    %    end
+    %end
 end
 
