@@ -76,3 +76,7 @@ for iDir=3:length(topDD)
     end
 end
 
+% SAVE THE FILE. SAVE THE FILE. SAVE IT LAWRENCE!!!
+if (~strcmp('', fn_GMM))
+    save( fn_GMM, 'GMM', '-mat');
+end
