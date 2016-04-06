@@ -21,7 +21,7 @@ function GMM = gmmTrain(dataDir, fn_GMM, M, max_iter)
 d = 13 + 1;
 
 % Convergence criteria hyperparameter.
-eps = 0.005;
+eps = 0.05;
 
 GMM = struct();
 
@@ -35,14 +35,14 @@ for iDir=3:length(topDD)
     curr_X = GMM.(spkr_name).X;
     T = size(curr_X, 1);
     
-    i = 0;
+    iter = 0;
     b = zeros(T, M);
     LL = zeros(T, M);
-    prev_LL = zeros(T, M) * -Inf;
+    prev_LL = zeros(T, M) * 0.1;
     diff = Inf;
 
     disp(spkr_name);
-    while (i < max_iter && diff >= eps)
+    while (iter < max_iter && diff >= eps)
         curr_mu = GMM.(spkr_name).mu;
         curr_sig = GMM.(spkr_name).sig;
         curr_w = GMM.(spkr_name).w;
@@ -70,9 +70,9 @@ for iDir=3:length(topDD)
                              sum(LL, 1).') - (GMM.(spkr_name).mu).^2; 
                          
         % Update convergence criterion.
-        diff = norm(LL - prev_LL);
+        diff = norm(abs(LL - prev_LL));
         prev_LL = LL;
-        i = i + 1;
+        iter = iter + 1;
     end
 end
 
