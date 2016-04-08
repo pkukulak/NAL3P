@@ -56,12 +56,14 @@ for iDir=3:length(topDD)
                       - (.5 * log(prod(sig_m)));
             b(:, i) = log_b_m;
         end
-        
+       
+        [max_b, max_b_ix] = max(b, [], 2);
+        b = bsxfun(@minus, b, max_b);
         % Then, for every model, calculate likelihood.
-        denom = bsxfun(@times, b, curr_w.');
-        numer = sum(denom, 2);
+        denom = bsxfun(@times, exp(b), curr_w.');
+        numer = sum(denom, 1);
         LL = bsxfun(@rdivide, denom, numer);
-        
+
         % Finally, update parameters.
         GMM.(spkr_name).w =  (sum(LL, 1) / T).';
         GMM.(spkr_name).mu = bsxfun(@rdivide, LL.' * curr_X, ...
