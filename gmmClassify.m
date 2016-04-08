@@ -1,3 +1,11 @@
+% A script for running speaker classification on
+% MFCCs of utterances.
+%
+% Modify the parameters below for desired behavior.
+% A model has already been trained in the file
+% m_8_iter_100.
+
+
 % Parameters for training.
 M = 8;
 d = 14;
