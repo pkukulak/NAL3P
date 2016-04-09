@@ -31,9 +31,9 @@ end
 
 % We return a struct with the initialized parameters and data
 % as fields.
-init_res.w = ones(M, 1) / M;
+init_res.w = (1/M) * ones(M, 1);
 init_res.mu = X(randperm(size(X, 1), M), :);
-init_res.sig = ones(M, d)*0.001;
+init_res.sig = ones(M, d);
 init_res.X = X(:, 1:14);
 
 end

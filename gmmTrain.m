@@ -21,7 +21,7 @@ function GMM = gmmTrain(dataDir, fn_GMM, M, max_iter)
 d = 13 + 1;
 
 % Convergence criteria hyperparameter.
-eps = 0.05;
+eps = 0.1;
 
 GMM = struct();
 
@@ -38,11 +38,11 @@ for iDir=3:length(topDD)
     iter = 0;
     b = zeros(T, M);
     LL = zeros(T, M);
-    prev_LL = zeros(T, M) * 0.1;
+    prev_LL = zeros(T, M);
     diff = Inf;
 
     disp(spkr_name);
-    while (iter < max_iter && diff >= eps)
+    while ((iter < max_iter) && (diff >= eps))
         curr_mu = GMM.(spkr_name).mu;
         curr_sig = GMM.(spkr_name).sig;
         curr_w = GMM.(spkr_name).w;
@@ -51,19 +51,28 @@ for iDir=3:length(topDD)
         for i=1:M
             mu_m = curr_mu(i, :);
             sig_m = curr_sig(i, :);
+            
             log_b_m = -(sum(bsxfun(@minus, curr_X, mu_m).^2, 2) ...
-                      / 2 * sum(sig_m)) - (d / 2) * log(2 * pi) ...
-                      - (.5 * log(prod(sig_m)));
+                      / (2 * sum(sig_m)) -(d / 2) * log(2 * pi) ...
+                       - (.5 * (sum(log(sig_m)))));
             b(:, i) = log_b_m;
+            %disp(log_b_m);
+            %pause;
+            
         end
-       
-        [max_b, max_b_ix] = max(b, [], 2);
-        b = bsxfun(@minus, b, max_b);
-        % Then, for every model, calculate likelihood.
-        denom = bsxfun(@times, exp(b), curr_w.');
-        numer = sum(denom, 1);
-        LL = bsxfun(@rdivide, denom, numer);
 
+        %[max_b, max_b_ix] = max(b, [], 2);
+        %b = bsxfun(@minus, b, max_b);
+        % Then, for every model, calculate likelihood.
+        
+        %numer = bsxfun(@times, exp(b), curr_w.');
+        numer = exp(b) .* repmat(curr_w.', T, 1);
+        %disp(exp(b));
+
+        denom = sum(numer, 2);
+        %LL = bsxfun(@rdivide, numer, denom);
+        LL = numer ./ repmat(denom, 1, M);
+        
         % Finally, update parameters.
         GMM.(spkr_name).w =  (sum(LL, 1) / T).';
         GMM.(spkr_name).mu = bsxfun(@rdivide, LL.' * curr_X, ...
@@ -75,6 +84,7 @@ for iDir=3:length(topDD)
         diff = norm(abs(LL - prev_LL));
         prev_LL = LL;
         iter = iter + 1;
+        
     end
 end
 
