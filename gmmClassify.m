@@ -9,7 +9,7 @@
 % Parameters for training.
 M = 8;
 d = 14;
-max_iter = 1;
+max_iter = 10;
 trainDataDir = '/u/cs401/speechdata/Training/';
 testDataDir = '/u/cs401/speechdata/Testing/';
 fn_GMM = ''; % Change this if you want to save the model.
@@ -24,7 +24,6 @@ for N=1:length(testDD)
     unkn_N = textread(speakerFn);
     unkn_N = unkn_N(:, 1:14);
     b = zeros(size(unkn_N,1), M);
-    
     % Calculate likelihood for each speaker.
     for S=3:length(trainDD)
         spkr = trainDD(S).name;
@@ -41,11 +40,13 @@ for N=1:length(testDD)
                       - (.5 * log(prod(sig_m)));
             b(:, i) = log_b_m;
         end
-        
+       
+        [max_b, max_b_ix] = max(b, [], 2);
+        b = bsxfun(@minus, b, max_b); 
+
         % Probabilities and log probabilities.
-        P = bsxfun(@times, b, curr_w.');
-        log_P = sum(log(P));
-        
-        [sorted_P, sorted_ix] = sort(log_P, 'descend');
+        P = bsxfun(@times, exp(b), curr_w.');
+        log_P = sum(log(P), 2);
+        sorted_log_P = sort(log_P, 'descend');
     end
 end

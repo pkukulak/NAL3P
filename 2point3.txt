@@ -1,0 +1,72 @@
+DISCUSSION
+----------
+
+Our models do not function properly. Even with a bounty of
+guidance, we were not able to correctly calculate b_m values.
+The math seems to be vectorized properly.
+
+Assuming our model is accurate, below are discussions of possible
+results when tuning hyperparameters:
+
+    * M (number of components in the GMM)
+
+    Given that our data is not as granular as it could be (d = 14),
+    increasing the number of components in the mixture may not prove
+    to be very useful. We wish to generalize well enough to classify
+    and generate samples correctly based on given data, so allowing
+    the model to fit a greater number of components to data that is
+    limited in it's dimension will simply overfit to training data.
+    This will result in excellent classification rates for testing
+    data that is very similar to training data, but very poor
+    performance on testing data that deviates from training data
+    to a certain degree (noise, accents and habits of speech that 
+    were not seen in the training set, etc.)
+
+    * epsilon (convergence criterion)
+    
+    Much like increasing the number of components, decreasing the
+    convergence criterion does not necessarily result in better
+    performance. If EM converges erratically, a greater epsilon value
+    could result in terminating EM too early. Similarly, a smaller
+    epsilon value could result in too many EM iterations. This would
+    leave us with an overtrained model.
+
+    A better approach would be to consider second/third/n-th differences.
+    Comparing the ratios across several iterations allows for greater
+    confidence in whether or not our model is beginning to converge.
+
+    * S (number of speakers)
+   
+    More data is always better. If we maintain equal cross-validation ratios
+    (e.g. 60 test utterances, 60 speakers, and so on) then we would be able
+    to generalize over a greater range of possible inputs. It would not be
+    particularly helpful if the number of speakers increased and the variance
+    in their utterances remained the same, but it would certainly allow for
+    a more precise model.
+
+    * Additional hypotheses
+
+    1. As described above, we believe a good approach to increasing
+       classification accuracy would be to consider a greater ratio of
+       differences when testing for convergence. It would also be helpful
+       to ensure that data is normalized and parameters (mean and variance)
+       are initialized relative to the actual data. Right now, variance
+       is initialized uniformly and the mean is initialized a random vector.
+       Perhaps it would be more helpful to initialize using a preliminary
+       clustering algorithm such as k-means?
+
+    2. A mixture model would be forced to decide that a given utterance does
+       not come from any of the trained speakers when the responsibilities
+       of each component are roughly equal. This indicates that there is no
+       component in the mixture that is profoundly distinguishable, given an
+       input. 
+
+    3. A support vector machine seems like it would be well-suited to this
+       task. MFCCs of utterances are obtained from a complex sequence of
+       transformations given sound waves. However, they maintain their 
+       structure of being nothing more than a combination of sinusoidal waves.
+       We could easily construct an effective kernel function for determining
+       linear margins across dimensions of the data. It may even prove to be
+       helpful to run PCA on the input data to reduce the dimensionality, even
+       if the dimension is quite small to begin with.
+
